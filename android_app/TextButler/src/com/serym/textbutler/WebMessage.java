@@ -1,12 +1,12 @@
 package com.serym.textbutler;
 
-
 import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.os.AsyncTask;
 import android.util.Log;
 
 /**
@@ -22,7 +22,7 @@ public class WebMessage {
 	/**
 	 * Address for resource of web application that will handles messages.
 	 */
-	private static final String WEB_APPLICATION_MESSAGE_HANDLER = "http://hackathon.serym.com/other/";
+	private static final String WEB_APPLICATION_MESSAGE_HANDLER = "http://hackathon.serym.com/?gen_message";
 
 	/**
 	 * Message parameter key for Google ID of the user of the android
@@ -98,20 +98,32 @@ public class WebMessage {
 	 *           be valid.
 	 * @throws ServerRequestException
 	 */
-	public void send() throws ServerRequestException {
+	public void send() {
 		Log.d(LOG_TAG, "send()");
+		AsyncTask<Object, Object, Object> task = new AsyncTask<Object, Object, Object>() {
+			@Override
+			protected Object doInBackground(Object... params) {
+				try {
+					URL webAppMessageHandler = new URL(
+							WEB_APPLICATION_MESSAGE_HANDLER);
 
-		try {
-			URL webAppMessageHandler = new URL(WEB_APPLICATION_MESSAGE_HANDLER);
+					Log.d(LOG_TAG, "webAppMessageHandler = "
+							+ webAppMessageHandler);
+					Log.d(LOG_TAG, "web message:  " + mMessage.toString());
+					ServerRequest.send(webAppMessageHandler,
+							mMessage.toString());
+				} catch (MalformedURLException e) {
+					// TODO properly handle exception
+					Log.d(LOG_TAG,
+							"URL for server request (intended for web application) failed to be sent",e);
+				} catch (ServerRequestException e) {
+					// TODO Auto-generated catch block
+					Log.d(LOG_TAG, "Error on Send",e);
+				}
+				return null;
+			}
+		};
+		task.execute();
 
-			Log.d(LOG_TAG, "webAppMessageHandler = " + webAppMessageHandler);
-			Log.d(LOG_TAG, "web message:  " + this.mMessage.toString());
-			ServerRequest.send(webAppMessageHandler, this.mMessage.toString());
-		} catch (MalformedURLException e) {
-			// TODO properly handle exception
-			e.printStackTrace();
-			Log.d(LOG_TAG,
-					"URL for server request (intended for web application) failed to be sent");
-		}
 	}
 }

@@ -89,6 +89,8 @@ public class AuthManager {
 	}
 
 	public String getToken() {
+		// TODO: use onPostExecute
+		
 		AsyncTask task = new AsyncTask() {
 			@Override
 			protected Object doInBackground(Object... act) {

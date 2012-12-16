@@ -5,15 +5,13 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.serym.textbutler.authentication.AuthManager;
 import com.serym.textbutler.authentication.TokenCallback;
+import com.serym.textbutler.authentication.TokenInfo;
 
 import android.os.Bundle;
 import android.accounts.AccountManager;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.util.Log;
-import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -41,8 +39,6 @@ public class Configure extends Activity {
 	/** Provides easy getters and setters for preferences */
 	private PreferenceManager pm;
 	
-	
-	
 	/** Provides easier access to authentication tokens */
 	private AuthManager am;
 
@@ -66,6 +62,7 @@ public class Configure extends Activity {
 		buttonChangeCurrentUser = (Button) findViewById(R.id.changeUser);
 		buttonCurrentlyOn = (ToggleButton) findViewById(R.id.statusButton);
 		buttonInvlidate = (Button) findViewById(R.id.invalidate);
+		Button buttonSendPacket = (Button) findViewById(R.id.testPacked);
 		
 		pm = new PreferenceManager(this);
 		am = new AuthManager(pm.getName(), this, new NewToken());
@@ -77,7 +74,7 @@ public class Configure extends Activity {
 		// set the onclicklisters for the buttons
 		buttonChangeCurrentUser.setOnClickListener(new ChangeUserListener());
 		buttonCurrentlyOn.setOnClickListener(new PowerButtonListener());
-		
+		buttonSendPacket.setOnClickListener(new SendPacketListener());
 		buttonInvlidate.setOnClickListener(new InvalidateListener());
 		
 		
@@ -151,6 +148,15 @@ public class Configure extends Activity {
 		@Override
 		public void onClick(View arg0) {
 			pm.setPowerState(buttonCurrentlyOn.isChecked());
+		}
+	}
+	
+	private class SendPacketListener implements OnClickListener {
+		@Override
+		public void onClick(View v) {
+			WebMessage m = new WebMessage("abc","abc", "how's it going?",
+					"Boshi");
+			m.send();
 		}
 	}
 	
