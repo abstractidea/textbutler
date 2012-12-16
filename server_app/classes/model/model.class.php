@@ -54,7 +54,26 @@
 			$result = curl_exec($curl);
 			curl_close($curl);
 		}
-		public function authenticate_goa($log='') {
+		public function gen_goa_url() {
+			$client = new Google_Client();
+			$client->setClientId(OAUTH_CLIENT_ID);
+			$client->setClientSecret(OAUTH_CLIENT_SECRET);
+			$client->setRedirectUri(OAUTH_REDIRECT_URI);
+			$client->setDeveloperKey(OAUTH_API_KEY);
+
+			return $client->createAuthUrl();
+		}
+		public function logout() {
+			$client = new Google_Client();
+			$client->setClientId(OAUTH_CLIENT_ID);
+			$client->setClientSecret(OAUTH_CLIENT_SECRET);
+			$client->setRedirectUri(OAUTH_REDIRECT_URI);
+			$client->setDeveloperKey(OAUTH_API_KEY);
+
+			unset($_SESSION['token']);
+			$client->revokeToken();
+		}
+		public function authenticate_goa($data='') {
 			$client = new Google_Client();
 			$client->setClientId(OAUTH_CLIENT_ID);
 			$client->setClientSecret(OAUTH_CLIENT_SECRET);
@@ -72,11 +91,6 @@
 			 $client->setAccessToken($_SESSION['token']);
 			}
 
-			if ($log=='logout') {
-			  unset($_SESSION['token']);
-			  $client->revokeToken();
-			}
-
 			if ($client->getAccessToken()) {
 			  $user = $oauth2->userinfo->get();
 
@@ -88,8 +102,6 @@
 
 			  // The access token may have been updated lazily.
 			  $_SESSION['token'] = $client->getAccessToken();
-			} else {
-			  $result['oauth_url'] = $client->createAuthUrl();
 			}
 
 			return $result;
