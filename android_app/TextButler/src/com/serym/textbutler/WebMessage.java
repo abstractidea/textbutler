@@ -2,6 +2,7 @@ package com.serym.textbutler;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Date;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,6 +48,11 @@ public class WebMessage {
 	 * received on user's android device.
 	 */
 	private static final String MESSAGE_PARAM_SMS_SENDER = "sms_sender";
+	
+	/**
+	 * Message parameter key for the time the message was recieved
+	 */
+	private static final String MESSAGE_PARAM_SMS_TIMESTAMP = "sms_message_timestamp";
 
 	/**
 	 * Data for web message that is intended to be communicated to the web
@@ -76,13 +82,14 @@ public class WebMessage {
 	 *            user's android device
 	 */
 	public WebMessage(String userGoogleID, String authToken, String smsMessage,
-			String smsSender) {
+			String smsSender, Date time) {
 		this.mMessage = new JSONObject();
 		try {
 			this.mMessage.put(MESSAGE_PARAM_USER_GOOGLE_ID, userGoogleID);
 			this.mMessage.put(MESSAGE_PARAM_AUTH_TOKEN, authToken);
 			this.mMessage.put(MESSAGE_PARAM_SMS_MESSAGE, smsMessage);
 			this.mMessage.put(MESSAGE_PARAM_SMS_SENDER, smsSender);
+			this.mMessage.put(MESSAGE_PARAM_SMS_TIMESTAMP, time.getTime());
 		} catch (JSONException e) {
 			// TODO properly handle exception
 			e.printStackTrace();

@@ -1,17 +1,17 @@
 package com.serym.textbutler;
 
+import java.util.Date;
+
 import com.serym.textbutler.authentication.AuthManager;
 import com.serym.textbutler.authentication.TokenCallback;
 import com.serym.textbutler.authentication.TokenInfo;
 
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.SmsMessage;
 import android.util.Log;
-import android.widget.Toast;
 
 public class SmsReciever extends BroadcastReceiver {
 	/** The name used to the the SMS details from the bundle */
@@ -24,15 +24,15 @@ public class SmsReciever extends BroadcastReceiver {
 	public void onReceive(Context context, Intent intent) {
 		// get preferences and authentication
 		PreferenceManager pm = new PreferenceManager(context);
-		AuthManager am = new AuthManager(pm.getName(), context,
-				new GotAuthInfo());
+		if (pm.getPowerState()) {
+			AuthManager am = new AuthManager(pm.getName(), context,
+					new GotAuthInfo());
 
-		Bundle extras = intent.getExtras();
-		if (extras != null) {
-
-			ContentResolver contentResolver = context.getContentResolver();
-			smsMessages = (Object[]) extras.get(SMS_EXTRA_NAME); //
-			am.getToken();
+			Bundle extras = intent.getExtras();
+			if (extras != null) {
+				smsMessages = (Object[]) extras.get(SMS_EXTRA_NAME); //
+				am.getToken();
+			}
 		}
 	}
 
@@ -43,12 +43,13 @@ public class SmsReciever extends BroadcastReceiver {
 			// each item in SMS Extra correlates to a text message
 			for (int i = 0; i < smsMessages.length; i++) {
 				TokenInfo info = new TokenInfo(token);
-				SmsMessage sms = SmsMessage.createFromPdu((byte[]) smsMessages[i]);
+				SmsMessage sms = SmsMessage
+						.createFromPdu((byte[]) smsMessages[i]);
 				String body = sms.getMessageBody().toString();
 				String address = sms.getOriginatingAddress();
-				
-				WebMessage m = new WebMessage(info.getUserId(),token, body,
-						address);
+
+				WebMessage m = new WebMessage(info.getUserId(), token, body,
+						address, new Date());
 				m.send();
 			}
 		}

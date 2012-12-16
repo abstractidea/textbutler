@@ -5,8 +5,6 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.serym.textbutler.authentication.AuthManager;
 import com.serym.textbutler.authentication.TokenCallback;
-import com.serym.textbutler.authentication.TokenInfo;
-
 import android.os.Bundle;
 import android.accounts.AccountManager;
 import android.app.Activity;
@@ -20,25 +18,26 @@ import android.widget.ToggleButton;
 
 public class Configure extends Activity {
 
+	/** Tag used for Logs */
 	public static final String TAG = "TextButler";
-	
+
 	/** The Text which lists the current user's name */
 	private TextView textCurrentUser;
 	/** The button which the user presses to change the current user */
 	private Button buttonChangeCurrentUser;
 	/** Weather or not the service is on */
 	private ToggleButton buttonCurrentlyOn;
-	
+
 	private Button buttonInvlidate;
 
-	private String mainToken;
-	
 	/** RequestCodes */
 	public static final int REQUEST_NEW_USER = 0x478;
 
+	/** The token for the currently selected user, if applicable */
+	private String mainToken;
+
 	/** Provides easy getters and setters for preferences */
 	private PreferenceManager pm;
-	
 	/** Provides easier access to authentication tokens */
 	private AuthManager am;
 
@@ -62,22 +61,20 @@ public class Configure extends Activity {
 		buttonChangeCurrentUser = (Button) findViewById(R.id.changeUser);
 		buttonCurrentlyOn = (ToggleButton) findViewById(R.id.statusButton);
 		buttonInvlidate = (Button) findViewById(R.id.invalidate);
-		Button buttonSendPacket = (Button) findViewById(R.id.testPacked);
-		
+
+		// get the managers used to retrieve preferences and authentication
 		pm = new PreferenceManager(this);
 		am = new AuthManager(pm.getName(), this, new NewToken());
-		
-		
+
 		// update the current name
 		updateName();
 
 		// set the onclicklisters for the buttons
 		buttonChangeCurrentUser.setOnClickListener(new ChangeUserListener());
 		buttonCurrentlyOn.setOnClickListener(new PowerButtonListener());
-		buttonSendPacket.setOnClickListener(new SendPacketListener());
 		buttonInvlidate.setOnClickListener(new InvalidateListener());
-		
-		
+
+		// set the current state for the power button
 		buttonCurrentlyOn.setChecked(pm.getPowerState());
 	}
 
@@ -92,16 +89,22 @@ public class Configure extends Activity {
 			String accountName = intent
 					.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
 			am.setName(accountName);
+			// after we set the account, get authorization for that account.
 			am.getToken();
 		}
-		
-		if(requestCode == AuthManager.REQUEST_OAUTH_PERMISSION && resultCode == Activity.RESULT_OK) {
+
+		// used on return from the AuthManager when the user has not yet granted
+		// permission.
+		if (requestCode == AuthManager.REQUEST_OAUTH_PERMISSION
+				&& resultCode == Activity.RESULT_OK) {
 			am.getToken();
 		}
 	}
-	
+
 	/**
 	 * Update the current name on the screen
+	 * Should be used from a UI Thread.
+	 * 
 	 */
 	private void updateName() {
 		String name = pm.getName();
@@ -111,7 +114,6 @@ public class Configure extends Activity {
 			textCurrentUser.setText(R.string.unknown_user);
 		}
 	}
-	
 
 	/**
 	 * Listens for a the user pressing the "Change User" button
@@ -119,56 +121,49 @@ public class Configure extends Activity {
 	private class ChangeUserListener implements OnClickListener {
 		@Override
 		public void onClick(View arg0) {
+			// start the account chooser activity
 			startActivityForResult(AccountPicker.newChooseAccountIntent(null,
 					null, new String[] { "com.google" }, false, null, null,
 					null, null), REQUEST_NEW_USER);
 		}
 	}
-	
+
 	/**
 	 * Listens for a user pressing the invalidate button
+	 * 
+	 * TODO: REMOVE THE INVALIDATE BUTTON
 	 */
-	
 	private class InvalidateListener implements OnClickListener {
 
 		@Override
 		public void onClick(View arg0) {
-			Log.d(TAG, "Attempting to invalidate: "+mainToken);
+			Log.d(TAG, "Attempting to invalidate: " + mainToken);
 			am.invalidateToken(mainToken);
 			pm.setName(null);
 			updateName();
 		}
 	}
-	
+
 	/**
 	 * Listens for a user pressing the "on/off" button
 	 */
-	
+
 	private class PowerButtonListener implements OnClickListener {
 		@Override
 		public void onClick(View arg0) {
 			pm.setPowerState(buttonCurrentlyOn.isChecked());
 		}
 	}
-	
-	private class SendPacketListener implements OnClickListener {
-		@Override
-		public void onClick(View v) {
-			WebMessage m = new WebMessage("abc","abc", "how's it going?",
-					"Boshi");
-			m.send();
-		}
-	}
-	
+
 	/**
-	 * Called when the AuthManager returns a value
-	 * This does not take place in the main thread.
+	 * Called when the AuthManager returns a value This does not take place in
+	 * the main thread.
 	 */
 	private class NewToken implements TokenCallback {
 
 		@Override
 		public void recieveToken(String name, String token) {
-			Log.d(TAG, "Got Token: "+token);
+			Log.d(TAG, "Got Token: " + token);
 			pm.setName(name);
 			mainToken = token;
 			// need to call UI updates on the UI Thread
@@ -185,6 +180,6 @@ public class Configure extends Activity {
 			Log.e(TAG, "Recieved Exception on Auth:" + e);
 			pm.setName(null);
 		}
-		
+
 	}
 }
