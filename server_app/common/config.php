@@ -4,4 +4,5 @@
 
 	require_once(ROOT.'common/constants.php');
 	require_once(ROOT.'common/functions.php');
+	require_once(ROOT.'common/oauth.secure.php');
 ?>

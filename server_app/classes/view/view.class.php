@@ -40,10 +40,10 @@
 				</html>
 			';
 		}
-		public function gen_view($result='') {
+		public function gen_view($data='') {
 			$this->gen_header();
 			$this->gen_precontent();
-			$this->gen_content($result);
+			$this->gen_content($data);
 			$this->gen_footer();
 		}
 	}
