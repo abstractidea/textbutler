@@ -1,0 +1,12 @@
+Options +FollowSymLinks
+RewriteEngine On
+
+RewriteCond %{SCRIPT_FILENAME} !-d
+RewriteCond %{SCRIPT_FILENAME} !-f
+
+RewriteRule ^login /?login
+RewriteRule ^logout /?logout
+RewriteRule ^signup /?signup
+RewriteRule ^checkin /?checkin
+RewriteRule ^send_gcm /?send_gcm
+RewriteRule ^oauth2callback$ /?oauth2callback$1
