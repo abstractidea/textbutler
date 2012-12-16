@@ -23,16 +23,6 @@
 	define('DB_TABLE_USER_ROLES', 'user_roles');
 	define('TOKEN_LENGTH', 32);
 
-	// GCM Defaults
-	define('GCM_API_KEY', 'AIzaSyDj_W5ROXC5VW5-MyPQv1jQVOl0Cxw_NKw');
-	define('GCM_SEND_URL', 'https://android.googleapis.com/gcm/send');
-
-	// OAUTH Defaults
-	define('OAUTH_API_KEY', 'AIzaSyBPh5LLyXcD8N_xwUYmcZrTd9MdsujZIXI');
-	define('OAUTH_CLIENT_ID', '1040104439467.apps.googleusercontent.com');
-	define('OAUTH_CLIENT_SECRET', 'GDZCaVwV9DesmOSKlq_jTpgZ');
-	define('OAUTH_REDIRECT_URI', 'http://hackathon.serym.com/');
-
 	// PHP Settings
 	define('DATE_FORMAT', 'ymd');
 	ini_set('error_log', LOGS.date(DATE_FORMAT).'_error.log');
