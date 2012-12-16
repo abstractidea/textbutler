@@ -2,7 +2,12 @@
 <resources>
 
     <string name="app_name">TextButler</string>
-    <string name="hello_world">Hello world!</string>
     <string name="menu_settings">Settings</string>
-
+    <string name="configure_title">Configure Butler</string>
+    <string name="configure_change_email">Current User:</string>
+    <string name="unknown_user">Unselected</string>
+    <string name="new_user">Select and Authenticate</string>
+    <string name="enable_text">Status:</string>
+    <string name="completed_auth">Completed Authentication:</string>
+    
 </resources>
