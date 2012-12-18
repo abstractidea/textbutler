@@ -146,7 +146,7 @@
 			session_destroy();
 		}
 		public function session_verify() {
-			if (isset($_SESSION['USERNAME'])&&isset($_SESSION['SESSION_ID'])&&isset($_SESSION['ROLE'])) {
+			if (isset($_SESSION['user_email'])&&isset($_SESSION['user_image'])) {
 				return TRUE;
 			}
 			else {

@@ -16,6 +16,6 @@ gen/
 local.properties
 
 # PHP Secure Information Files
-common/
+server_app/common/
 oauth.secure.php
 constants.php

@@ -23,9 +23,11 @@
 		return '<script type="text/javascript" src="'.RESOURCES.'js/'.$name.'.js"></script>';
 	}
 	function loadSettings() {
+		loadModel();
 		loadModel('session');
-		$model = new session;
-		if ($model->session_verify()) {
+		$model = new model;
+		$session = new session;
+		if ($session->session_verify()) {
 			return '
 				<li><a href="'.WEB_ROOT.'tools">Tools</a></li>
 				<li><a href="'.WEB_ROOT.'logout">Logout</a></li>
@@ -33,27 +35,7 @@
 		}
 		else {
 			return '
-				<li id="login">
-					<a id="login_link">Login</a>
-					<div id="login_sub" class="invisible">
-						<form action="'.WEB_ROOT.'login" method="post">
-						<input type="hidden" name="submit" value="TRUE" />
-						<table>
-							<tr>
-								<td><label>Username: </label></td>
-								<td><input type="text" name="username" /></td>
-							</tr>
-							<tr>
-								<td><label>Password: </label></td>
-								<td><input type="password" name="password" /></td>
-							</tr>
-							<tr id="login_submit" colspan="2">
-								<td><input type="submit" value="Login" /></td>
-							</tr>
-						</table>
-						</form>
-					</div>
-				</li>
+				<li id="login"><a id="login_link" href="'.$model->gen_goa_url().'">Login</a></li>
 			';
 		}
 	}

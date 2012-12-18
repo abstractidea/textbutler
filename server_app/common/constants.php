@@ -17,7 +17,7 @@
 	define('DB', 'palenous_hackathon_textbutler');
 	define('DB_HOST', 'localhost');
 	define('DB_USER', 'palenous_hackath');
-	define('DB_PASS', '4}Z}l$a0L^3v');
+	define('DB_PASS', '#3Cw]zI!JHsq');
 	define('DB_TABLE_USERS', 'users');
 	define('DB_TABLE_ROLES', 'roles');
 	define('DB_TABLE_USER_ROLES', 'user_roles');
@@ -33,7 +33,6 @@
 	define('SERVER_URL', $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']);
 
 	// Session Settings
-	session_set_cookie_params(604800, '/', '.serym.com');
 	session_start();
 	define('SESSION_ID_LENGTH', 16);
 	define('LOGIN_SLEEP_TIME', 3);
