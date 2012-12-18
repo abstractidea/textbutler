@@ -1,13 +1,11 @@
 package com.serym.textbutler.authentication;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.auth.UserRecoverableAuthException;
+
 import com.serym.textbutler.Configure;
 
 import android.app.Activity;
@@ -17,6 +15,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 public class AuthManager {
+
 	/** The name to attempt to authenticate with */
 	private String name;
 	/** The context to authenticate in */
@@ -29,6 +28,10 @@ public class AuthManager {
 	private static final int MINIMUM_TIME = 60;
 
 	public static final int REQUEST_OAUTH_PERMISSION = 0x479;
+
+	public static final int EB_NUMBER_RETRIES = 5;
+
+	public static final int EB_EXPONENTIAL_NUMBER = 2;
 
 	/**
 	 * Create a new AuthManager for authentication. Used to execute
@@ -83,6 +86,8 @@ public class AuthManager {
 	 * Used to change a users name.
 	 * 
 	 * @param name
+	 *            The users name to attempt to get the token for on the next
+	 *            query.
 	 */
 	public void setName(String name) {
 		this.name = name;
@@ -90,32 +95,59 @@ public class AuthManager {
 
 	public String getToken() {
 		// TODO: use onPostExecute
-		
+
 		AsyncTask task = new AsyncTask() {
 			@Override
 			protected Object doInBackground(Object... act) {
-				// retrieve a new token
-				String token = getTokenBlocking();
-				if (isValid(token)) {
-					callback.recieveToken(name, token);
-					return null;
-				} if(token == null) {
-					// an error message has already been thrown
-					return null;
-				} else {
-					invalidateToken(token);
-					token = getTokenBlocking();
+				try {
+					String token = "";
+					int numRetries = 0;
+					boolean success = false;
+					IOException lastException = null;
+					// execute exponential backoff
+					while (numRetries < EB_NUMBER_RETRIES && !success
+							&& !Thread.interrupted()) {
+						numRetries++;
+						try {
+							token = getTokenBlocking();
+							if (isValid(token)) {
+								callback.recieveToken(name, token);
+								success = true;
+								Log.d(Configure.TAG+"_AM", "Got a valid token");
+								return null;
+							} else {
+								invalidateToken(token);
+							}
+						} catch (UserRecoverableAuthException e) {
+							// methods higher on the call stack have taken care
+							// of this.
+							Log.d(Configure.TAG+"_AM", "Got a user recoverable auth");
+							return null;
+						} catch (IOException e) {
+							// wait
+							try {
+								Thread.sleep((long) (Math.pow(
+										EB_EXPONENTIAL_NUMBER, numRetries)*1000));
+							} catch (InterruptedException interuptedEx) {
+								callback.recieveError(e);
+								Log.d(Configure.TAG+"_AM", "Interupted Exception");
+								return null;
+							}
+							lastException = e;
+						}
+					}
+
+					callback.recieveError(lastException != null ? lastException
+							: new Exception("Unable to retrieve valid token."));
+
+				} catch (GoogleAuthException e) {
+					// according to google's docs, GoogleAuthErrrs shouldn't be
+					// retried.
+					callback.recieveError(e);
 				}
 				
-				if(isValid(token)) {
-					callback.recieveToken(name, token);
-				} else if (token == null) {
-					// error already thrown
-					return null;
-				} else {
-					callback.recieveError(new Exception("Invalid token recieved."));
-				}
-
+				Log.d(Configure.TAG+"_AM", "Returning at end");
+				
 				return null;
 
 			}
@@ -129,7 +161,7 @@ public class AuthManager {
 	 * 
 	 * @return
 	 */
-	public String getTokenBlocking() {
+	public String getTokenBlocking() throws GoogleAuthException, IOException, UserRecoverableAuthException{
 		if (isForeground) {
 			try {
 				String token = GoogleAuthUtil
@@ -139,13 +171,9 @@ public class AuthManager {
 			} catch (UserRecoverableAuthException e) {
 				((Activity) cntxt).startActivityForResult(e.getIntent(),
 						AuthManager.REQUEST_OAUTH_PERMISSION);
-			} catch (GoogleAuthException e) {
-				callback.recieveError(e);
-			} catch (IOException e) {
-				callback.recieveError(e);
+				throw e;
 			}
 		} else {
-			try {
 				String token = GoogleAuthUtil
 						.getTokenWithNotification(
 								cntxt,
@@ -153,15 +181,8 @@ public class AuthManager {
 								"oauth2:https://www.googleapis.com/auth/userinfo.profile",
 								new Bundle());
 				return token;
-			} catch (UserRecoverableAuthException e) {
-				// user has been notified
-			} catch (GoogleAuthException e) {
-				callback.recieveError(e);
-			} catch (IOException e) {
-				callback.recieveError(e);
-			}
+			
 		}
-		return null;
 	}
 
 	public void invalidateToken(String token) {
@@ -169,12 +190,13 @@ public class AuthManager {
 	}
 
 	public static boolean isValid(String token) {
-		if(token == null) {
+		if (token == null) {
 			return false;
 		}
 		TokenInfo tokenInfo = new TokenInfo(token);
-		Log.d(Configure.TAG, "Time Left: "+tokenInfo.getExpiresIn());
-		return !tokenInfo.isErrorMessage() && tokenInfo.getExpiresIn() > MINIMUM_TIME;
+		Log.d(Configure.TAG, "Time Left: " + tokenInfo.getExpiresIn());
+		return !tokenInfo.isErrorMessage()
+				&& tokenInfo.getExpiresIn() > MINIMUM_TIME;
 	}
 
 }
