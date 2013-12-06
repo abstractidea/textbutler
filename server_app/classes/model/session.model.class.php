@@ -1,4 +1,5 @@
 <?php
+	// 12-06-13: This class is very outdated...
 	class session {
 		public function id_gen($length=SESSION_ID_LENGTH) {
 			$char = '!@#$%^&*()_-+=0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
